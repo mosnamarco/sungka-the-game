@@ -1,6 +1,6 @@
 # C-client-socket-game
 
-# How to Use?
+# How to use?
 
 Make the server and client
 `make`
