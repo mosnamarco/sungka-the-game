@@ -46,9 +46,10 @@ int main(int argc, char *argv[])
       close(client_socket);
       exit_with_error("Something went wrong recieving the message...");
     }
+    printf("\033[1G\033[2K");
     printf("[client]: %s", buffer);
   }
-  while(pid > 0) {
+  while(pid > 0) { 
     printf("[me]: ");
     fgets(buffer, sizeof(buffer), stdin);
     n = send(client_socket, buffer, sizeof(buffer), 0);

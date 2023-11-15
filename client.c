@@ -15,6 +15,7 @@ void connect_client_to_server(int, struct sockaddr_in);
 
 int main(int argc, char *argv[])
 {
+  printf("hello user");
   // create socket
   int client_socket = socket(AF_INET, SOCK_STREAM, 0);
   
@@ -39,10 +40,11 @@ int main(int argc, char *argv[])
       close(client_socket);
       exit_with_error("Error: recv() Failed.");
     }
+    printf("\033[1G\033[2K");
     printf("[server]: %s", buffer);
   }
   while(pid > 0) {
-    bzero(buffer, sizeof(buffer));
+    bzero(buffer, sizeof(buffer)); 
     printf("[me]: ");
     fgets(buffer, sizeof(buffer), stdin);
     n = send(client_socket, buffer, sizeof(buffer), 0);
@@ -51,7 +53,6 @@ int main(int argc, char *argv[])
       exit_with_error("Error sending message...");
     }
   }
- 
   
   close(client_socket);
   
