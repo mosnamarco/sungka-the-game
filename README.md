@@ -83,6 +83,10 @@ example code snippet for creating a branch for a bugfix:
 or
 `git checkout -b bugfix/server-connection-issue` 
 
+**Pull Requests**
+
+`git pull origin <branch name>`
+
 **Creating Commits**
 
 For creating commits, refer to [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)
