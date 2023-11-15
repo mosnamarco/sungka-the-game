@@ -87,6 +87,21 @@ or
 
 For creating commits, refer to [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)
 
+| Commit Type         | Description                                                                                              | Semantic Versioning Equivalent |
+|---------------------|----------------------------------------------------------------------------------------------------------|-------------------------------|
+| fix                 | A commit that patches a bug in the codebase.                                                               | PATCH                         |
+| feat                | A commit that introduces a new feature to the codebase.                                                     | MINOR                         |
+| BREAKING CHANGE     | A commit introducing a breaking API change indicated by a footer `BREAKING CHANGE:` or `!` after type/scope.| MAJOR                         |
+| build               | A commit related to building processes or tools configuration.                                              | -                             |
+| chore               | A commit that involves changes to tasks or maintenance activities.                                          | -                             |
+| ci                  | A commit related to continuous integration or deployment.                                                    | -                             |
+| docs                | A commit that includes documentation changes.                                                               | -                             |
+| style               | A commit that addresses code styling/formatting (whitespace, formatting, etc.).                             | -                             |
+| refactor            | A commit that involves code restructuring without changes in functionality.                                 | -                             |
+| perf                | A commit that improves code performance.                                                                    | -                             |
+| test                | A commit related to tests or testing frameworks.                                                             | -                             |
+| and others...       | Additional commit types may be used based on specific project requirements or conventions.                  | -                             |
+
 Commit message template
 ```
 <type>[optional scope]: <description>
