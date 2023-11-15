@@ -33,26 +33,30 @@ int main(int argc, char *argv[])
 
   int client_socket = listen_and_accept_connections(server_socket);
 
-  while (1) {
-    // recieve message from client
-    char client_message[256];
-    ssize_t bytesRead = recv(client_socket, client_message, sizeof(client_message), 0);
-    
-    if (bytesRead == 0)
-      exit_with_error("Client Disconnected...");
+  // fork process for listening and sending message
+  int pid;
+  pid = fork();
 
-    // print client message
-    client_message[bytesRead] = '\0';
-    printf("client > %s\n", client_message);
-
-    // get input/message from user
-    char server_message[256];
-    printf("server[USER] > ");
-    fgets(server_message, sizeof(server_message), stdin);
-
-    // send message/input to client
-    fflush(stdin);
-    send(client_socket, server_message, sizeof(server_message), 0);
+  char buffer[256];
+  int n;
+  while(pid == 0) {
+    n = recv(client_socket, buffer, sizeof(buffer), 0);
+    if (n <= 0) {
+      close(server_socket);
+      close(client_socket);
+      exit_with_error("Something went wrong recieving the message...");
+    }
+    printf("[client]: %s", buffer);
+  }
+  while(pid > 0) {
+    printf("[me]: ");
+    fgets(buffer, sizeof(buffer), stdin);
+    n = send(client_socket, buffer, sizeof(buffer), 0);
+    if (n <= 0) {
+      close(server_socket);
+      close(client_socket);
+      exit_with_error("Something went wrong sending the message...");
+    }
   }
 
   // close the sockets
