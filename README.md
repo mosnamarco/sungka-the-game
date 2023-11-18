@@ -41,8 +41,8 @@ source: [Wikipedia](https://en.wikipedia.org/wiki/Southeast_Asian_mancala)
 1. `git clone <repository link>`
 2. `cd <cloned repository directory>`
 3. `make`
-4. run server `./dist/server`
-5. run client `./dist/client`
+4. run server `./server`
+5. run client `./client`
 
 ## For contributing developers
 
