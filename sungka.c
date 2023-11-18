@@ -1,5 +1,11 @@
 #include "sungka.h"
 
+void flushInputBuffer() {
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF) {
+    }
+}
+
 void initSungka(Sungka *board) {
 	/* 
 		Player A will be the first mover
@@ -10,9 +16,8 @@ void initSungka(Sungka *board) {
     board->currentPlayer = true;
 	board->flow = true;
 	board->turns = 0;
-	board->finished = false;
     for (int i = 0; i < 16; i++) {
-		board->pits[i] = 7;  // Start with 7 shells in each pit
+		board->pits[i] = 1;  // Start with 7 shells in each pit
     }
 	//Set all scores to 0
 	board->pits[7] = 0;
@@ -64,6 +69,10 @@ void displayBoard(const Sungka *board){
 	displayPits(board->pits, true);
 }
 
+void clearScreen(){
+	printf("\x1b[H\x1b[J");
+}
+
 void switchPlayer(Sungka *board){
 	board->currentPlayer = !board->currentPlayer;
 }
@@ -106,6 +115,41 @@ bool isPlayerPits(bool player, int pit){
 	return false;
 }
 
+//Validate User Input
+bool isValid(const Sungka* board, const bool player , char* buffer, int* index){
+	bool isValid = false;
+	int i;
+	// Remove the newline character if it exists in the buffer
+		size_t raw_len = strlen(buffer);
+		size_t len = raw_len - 1;
+		if (len > 0 && buffer[len] == '\n') {
+			buffer[len] = '\0';
+		} else {
+			// If no newline character was found, flush the input buffer
+			flushInputBuffer();
+		}
+		*index = atoi(buffer);
+		i = *index;
+		int actual = i;
+
+	if( ((len) == 1) && (isdigit(buffer[0])) && (0 <= i && i <= 6)){
+		if(player)
+			actual = getPitIndexAcross(i);
+		else
+			actual = i;
+		if( (board->pits[actual] > 0))
+			isValid = true;
+		// printf("Is Valid Input %d", isValid);
+		// printf("Board Pit: [%d]\n", board->pits[actual]);
+	}
+	// else printf("Invalid Input\n");
+	// printf("Len of String: %lx\n", len);
+	// printf("Is Input a digit: %d\n", isdigit(buffer[0]));
+	// printf("Is Within Range [0-6]: %d\n", (0 <= i && i <= 6));
+	return isValid;
+}
+
+//Query Board: Boolean
 bool isEmptyPit(Sungka *board, int pit){
 	if(board->pits[pit] == 0){
 		return true;
@@ -113,7 +157,7 @@ bool isEmptyPit(Sungka *board, int pit){
 	return false;
 }
 
-bool isHasMoves(bool player, const int* pits){
+bool isHasMoves(const Sungka* board,  const bool player){
 	int start, end;
 	if(player){
 		start = 8, end = 14;
@@ -122,24 +166,21 @@ bool isHasMoves(bool player, const int* pits){
 		start = 0, end = 6;
 	}
 	for(int i = start; i <= end; ++i){
-		if(pits[i] > 0){
+		if(board->pits[i] > 0){
 			return true;
 		}
 	}
 	return false;	
 }
 
-bool isFinished(Sungka* board){
-	if(isHasMoves(true, board->pits) || isHasMoves(false, board->pits)){
-		board->finished = false;
-	}
-	else{
-		board->finished = true;
-	}
-	return board->finished;
+bool isEndCondition(const Sungka* board){
+	bool hasMoveA = isHasMoves(board, true);
+	bool hasMoveB = isHasMoves(board, false);
+	return (!hasMoveA && !hasMoveB)? true : false;
 }
 
-Winner whoWinner(Sungka* board){
+//Check Who's Winner
+Winner whoWinner(const Sungka* board){
 	int a = getScore(board, true);
 	int b = getScore(board, false);
 	if(a > b){
@@ -170,6 +211,8 @@ int getScore(const Sungka *board, const bool player){
 }
 
 int getUserMove(Sungka *board){
+	//Display Board
+	clearScreen();
 	if(!board->currentPlayer){
 		displayGuide();
 	}
@@ -177,10 +220,15 @@ int getUserMove(Sungka *board){
 	if(board->currentPlayer){
 		displayGuide();
 	}
+
+	//Get User Input
+	char buffer[100];
 	int index;
-	printf("Player %c's Turn (0-6): ", getPlayer(board->currentPlayer));
-	scanf("%d", &index);
-	if(0 <= index && index <= 6){
+	printf("Player %c [0-6]: ", getPlayer(board->currentPlayer));
+	fgets(buffer, sizeof(buffer), stdin);
+	
+	//Validate User Input
+	if(isValid(board, board->currentPlayer, buffer, &index)){
 		if(board->currentPlayer){
 			index = getPitIndexAcross(index);
 		}
@@ -192,26 +240,14 @@ int getUserMove(Sungka *board){
 }
 
 void simulate(Sungka *board, int i){
-	/* 
-		//if the next pit is the player's home pit, add score
-		//if the player has 1 shell left and next pit is:
-			// if player's home pit: (Partial)
-				- prompt the use to choose an input then simulate() again, current player's turn again
-			// else if empty:
-				// if is in player's side (Done)
-					- get the shells across and add to player score, end turn
-				// if is in opponent's side (Done)
-					- Add shell to pit, end turn
-			// else if not empty (either side):
-				- get all shells in the pit and continue iterating
-	*/
 	int shells = board->pits[i];
 	board->pits[i] = 0;
-	int j = 1; // incrementor 
+	int j = 1; // incrementor
 	if(!board->flow){
 		j = -1;
 	}
 	while(shells){
+		clearScreen();
 		i = (i + j) % 16;
 		if(shells == 1){
 			// Check if the current pit is a home
@@ -226,7 +262,6 @@ void simulate(Sungka *board, int i){
 				}
 				//move to next pit if not player's Home
 				else{
-					printf("\x1b[H\x1b[J");
 					continue;
 				}
 			}
@@ -264,7 +299,6 @@ void simulate(Sungka *board, int i){
 				}
 				//move to next pit if not player's Home
 				else{
-					printf("\x1b[H\x1b[J");
 					continue;
 				}
 			}
@@ -273,30 +307,29 @@ void simulate(Sungka *board, int i){
 			}
 		}
 		//Update Screen
-		printf("\x1b[H\x1b[J");
+		clearScreen();
 		printf("Player %c's Turn\n", getPlayer(board->currentPlayer));
 		printf("Shells: %d\n", shells);
 		displayBoard(board);
 		printf("\n");
 		usleep(500000);
 	}
-	printf("\x1b[H\x1b[J");
+	clearScreen();
 	printf("\n\n");
-	switchPlayer(board);
-	if(isFinished(board)){
-			printf("\x1b[H\x1b[J");
-		Winner who = whoWinner(board);
-		return;
-	}
 }
 
 int main() {
+	Winner winner;
     Sungka sungkaBoard;
-
     initSungka(&sungkaBoard);
 	while(true){
+		if(isEndCondition(&sungkaBoard)) break;
+		if(!isHasMoves(&sungkaBoard, sungkaBoard.currentPlayer)) switchPlayer(&sungkaBoard);
 		int i = getUserMove(&sungkaBoard);
 		simulate(&sungkaBoard, i);
+		switchPlayer(&sungkaBoard);
 	}
+	displayBoard(&sungkaBoard);
+	winner = whoWinner(&sungkaBoard);
     return 0;
 }
