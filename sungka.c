@@ -17,7 +17,7 @@ void initSungka(Sungka *board) {
 	board->flow = true;
 	board->turns = 0;
     for (int i = 0; i < 16; i++) {
-		board->pits[i] = 1;  // Start with 7 shells in each pit
+		board->pits[i] = 7;  // Start with 7 shells in each pit
     }
 	//Set all scores to 0
 	board->pits[7] = 0;
@@ -226,7 +226,7 @@ int getUserMove(Sungka *board){
 	int index;
 	printf("Player %c [0-6]: ", getPlayer(board->currentPlayer));
 	fgets(buffer, sizeof(buffer), stdin);
-	
+
 	//Validate User Input
 	if(isValid(board, board->currentPlayer, buffer, &index)){
 		if(board->currentPlayer){
