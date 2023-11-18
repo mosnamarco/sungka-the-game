@@ -26,33 +26,33 @@ int main(int argc, char *argv[])
 
   connect_client_to_server(client_socket, server_address);
 
-  // fork processess for listen and sending messages
-  int pid;
-  pid = fork();
+  while (1) {
+    char client_message[256];
+    printf("client[USER] > ");
+    fgets(client_message, sizeof(client_message), stdin);
+    
+    // exit game if user wills
+    if (strcmp(client_message, ":q\n") == 0) {
+      close(client_socket);
+      return 0;
+    }
 
-  char buffer[256];
-  int n;
-  while(pid == 0) {
-    bzero(buffer, sizeof(buffer));
-    n = recv(client_socket, buffer, sizeof(buffer), 0);
-    if (n <= 0) {
-      close(client_socket);
-      exit_with_error("Error: recv() Failed.");
-    }
-    printf("[server]: %s", buffer);
-  }
-  while(pid > 0) {
-    bzero(buffer, sizeof(buffer));
-    printf("[me]: ");
-    fgets(buffer, sizeof(buffer), stdin);
-    n = send(client_socket, buffer, sizeof(buffer), 0);
-    if (n <= 0) {
-      close(client_socket);
-      exit_with_error("Error sending message...");
-    }
-  }
- 
-  
+    // send message to server
+    fflush(stdin);
+    send(client_socket, client_message, sizeof(client_message), 0);
+
+    // get message from server
+    char server_message[256];
+    int bytesRead = recv(client_socket, server_message, sizeof(server_message), 0);
+
+    if (bytesRead == 0)
+      exit_with_error("Server disconnected...");
+
+    // print server message
+    server_message[bytesRead] = '\0';
+    printf("server > %s\n", server_message);
+  } 
+
   close(client_socket);
   
   return 0;
@@ -70,4 +70,3 @@ void connect_client_to_server(int client_socket, struct sockaddr_in server_addre
   if (connection_status < 0)
     exit_with_error("Failed to connect to server...");
 }
-
