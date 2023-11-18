@@ -3,15 +3,19 @@ CFLAGS = -Wall
 
 all: server client sungka
 
-server: server.c
-	$(CC) $(CFLAGS) server.c -o server
+server: ./src/server.c
+	$(CC) $(CFLAGS) ./src/server.c -o ./dist/server
 
-client: client.c
-	$(CC) $(CLFAGS) client.c -o client
+client: ./src/client.c
+	$(CC) $(CLFAGS) ./src/client.c -o ./dist/client
+
+sungka: ./src/sungka.c
+	$(CC) $(CLFAGS) ./src/sungka.c -o ./dist/sungka
 
 sungka: sungka.c
 	$(CC) $(CLFAGS) sungka.c -o sungka
 
 clean: 
-	rm -f server
-	rm -f client
+	rm -f ./dist/server
+	rm -f ./dist/client
+	rm -f ./dist/sungka
