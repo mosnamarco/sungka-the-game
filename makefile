@@ -1,18 +1,20 @@
 CC = gcc
 CFLAGS = -Wall
+BUILD_DIR = dist
 
-all: server client sungka
+all: $(BUILD_DIR) server client sungka
 
-server: ./src/server.c
-	$(CC) $(CFLAGS) ./src/server.c -o ./dist/server
+$(BUILD_DIR):
+	mkdir -p $@
 
-client: ./src/client.c
-	$(CC) $(CLFAGS) ./src/client.c -o ./dist/client
+server:
+	$(CC) $(CFLAGS) ./src/server.c -o $(BUILD_DIR)/server
 
-sungka: ./src/sungka.c
-	$(CC) $(CLFAGS) ./src/sungka.c -o ./dist/sungka
+client:
+	$(CC) $(CFLAGS) ./src/client.c -o $(BUILD_DIR)/client
+
+sungka:
+	$(CC) $(CFLAGS) ./src/sungka.c -o $(BUILD_DIR)/sungka
 
 clean: 
-	rm -f ./dist/server
-	rm -f ./dist/client
-	rm -f ./dist/sungka
+	rm -rf $(BUILD_DIR)
