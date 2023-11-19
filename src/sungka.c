@@ -1,4 +1,4 @@
-#include "sungka.h"
+#include "include/sungka.h"
 
 void flushInputBuffer() {
     int c;
