@@ -1,17 +1,7 @@
+#include "../include/connection.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include <sys/types.h>
-#include <sys/socket.h>
-
-#include <netinet/in.h>
-#include <netdb.h>
-
-#include <unistd.h>
-
-void exit_with_error(char *);
-void connect_client_to_server(int, struct sockaddr_in);
 
 int main(int argc, char *argv[])
 {
@@ -20,9 +10,7 @@ int main(int argc, char *argv[])
   
   // specify an address for the socket we want to connect to
   struct sockaddr_in server_address;
-  server_address.sin_family = AF_INET;
-  server_address.sin_port = htons(9888);
-  server_address.sin_addr.s_addr = INADDR_ANY;
+  init_server(&server_address);
 
   connect_client_to_server(client_socket, server_address);
 
@@ -56,17 +44,4 @@ int main(int argc, char *argv[])
   close(client_socket);
   
   return 0;
-}
-
-void exit_with_error(char *message) {
-  printf("%s", message);
-  exit(-1);
-}
-
-void connect_client_to_server(int client_socket, struct sockaddr_in server_address) {
-// connect client socket to server address specified above
-  int connection_status = connect(client_socket, (struct sockaddr *) &server_address, sizeof(server_address));
-
-  if (connection_status < 0)
-    exit_with_error("Failed to connect to server...");
 }

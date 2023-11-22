@@ -1,3 +1,5 @@
+# ifndef SUNGKA_H
+# define SUNGKA_H
 #include <ctype.h>
 #include <stdio.h>
 #include <stdbool.h>
@@ -85,3 +87,4 @@ int getUserMove(Sungka*);
 
 //Simulate a player's turn
 void simulate(Sungka*, int);
+#endif
