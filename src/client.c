@@ -5,17 +5,15 @@
 
 int main(int argc, char *argv[])
 {
-  // create socket
-  int client_socket = socket(AF_INET, SOCK_STREAM, 0);
-  
-  // specify an address for the socket we want to connect to
+  // Define Client Connection Requirements and Make Client Connect to Server
+  int client_socket;
   struct sockaddr_in server_address;
-  init_server(&server_address);
-
-  connect_client_to_server(client_socket, server_address);
+  init_client_connection(&server_address, &client_socket);
+  //Define Message Buffers
+  char client_message[256];
+  char server_message[256];
 
   while (1) {
-    char client_message[256];
     printf("client[USER] > ");
     fgets(client_message, sizeof(client_message), stdin);
     
@@ -30,7 +28,6 @@ int main(int argc, char *argv[])
     send(client_socket, client_message, sizeof(client_message), 0);
 
     // get message from server
-    char server_message[256];
     int bytesRead = recv(client_socket, server_message, sizeof(server_message), 0);
 
     if (bytesRead == 0)
