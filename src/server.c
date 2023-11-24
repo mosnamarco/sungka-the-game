@@ -1,4 +1,5 @@
 #include "../include/connection.h"
+#include "../include/sungka.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -12,27 +13,37 @@ int main(int argc, char *argv[])
   //Define Message Buffers
   char client_message[256];
   char server_message[256];
-
-  while (1) {
-    // recieve message from client
-    ssize_t bytesRead = recv(client_socket, client_message, sizeof(client_message), 0);
-    
-    if (bytesRead == 0)
-      exit_with_error("Client Disconnected...");
-
-    // print client message
-    client_message[bytesRead] = '\0';
-    printf("client > %s\n", client_message);
-
-    // get input/message from user
-    printf("server[USER] > ");
-    fgets(server_message, sizeof(server_message), stdin);
-
-    // send message/input to client
-    fflush(stdin);
-    send(client_socket, server_message, sizeof(server_message), 0);
+  Sungka board;
+  initSungka(&board);
+  initPlayer(&board, true); // Server is the Player A
+  send_t(client_socket, &board);
+  printf("Waiting for Your Opponent...\n");
+  recv_t(client_socket, &board);
+  clearScreen();
+  printf("You are Against %s\n", board.B.name);
+  
+  while(!isEndCondition(&board)){
+    if(board.currentPlayer) {
+      if(!isHasMoves(&board, board.currentPlayer)){
+        switchPlayer(&board);
+        toggleToMove(&board);
+      }
+      if(board.A.toMove){
+        setUserMove(&board);
+        toggleToMove(&board);
+      }
+      if(board.A.shells == 0){
+        switchPlayer(&board);
+        toggleToMove(&board);
+      }
+      simulateStep(&board);
+      send_t(client_socket, &board);
+      updateScreen(&board, 500000);
+    }else{
+      recv_t(client_socket, &board);
+      updateScreen(&board, 500000);
+    }
   }
-
   // close the sockets
   close(server_socket);
   close(client_socket);

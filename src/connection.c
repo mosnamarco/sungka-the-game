@@ -20,7 +20,7 @@ void exit_with_error(char *message) {
 
 void init_server(struct sockaddr_in* server_address){
     server_address->sin_family = AF_INET;
-    server_address->sin_port = htons(9888);
+    server_address->sin_port = htons(PORT_ADDR);
     server_address->sin_addr.s_addr = INADDR_ANY;
 }
 
@@ -30,6 +30,8 @@ void connect_client_to_server(int* client_socket, struct sockaddr_in* server_add
 
   if (connection_status < 0)
     exit_with_error("Failed to connect to server...");
+
+  printf("Connection Successful!\n");
 }
 
 int listen_and_accept_connections(int server_socket) {
@@ -46,4 +48,14 @@ int listen_and_accept_connections(int server_socket) {
     printf("Connection successful!\n");
   
   return client_socket;
+}
+
+void send_t(int client_socket, Sungka* msg){
+    send(client_socket, msg, sizeof(Sungka), 0);
+}
+
+void recv_t(int client_socket, Sungka* msg){
+    int bytesRead = recv(client_socket, msg, sizeof(Sungka), 0);
+    if (bytesRead == 0)
+      exit_with_error("Client Disconnected...");
 }
