@@ -19,12 +19,22 @@ int main(int argc, char *argv[])
   send_t(client_socket, &board);
   clearScreen();
   printf("You are Against %s\n", board.A.name);
+  //Set The Initial Move for Starting State
+  recv_t(client_socket, &board);
+  setUserMove(&board);
+  switchPlayer(&board);
+  send_t(client_socket, &board);
   
   while(!isEndCondition(&board)){
-    normalState(&board, player, client_socket);
-    updateScreen(&board, 500000);
+    if(board.isStartState)
+      startState(&board, player, client_socket);
+    else
+      normalState(&board, player, client_socket);
+    updateScreen(&board, player, 350000);
   }
-  close(client_socket);
+  recv_t(client_socket, &board);
+  whoWinner(&board, player);
   
+  close(client_socket);
   return 0;
 }

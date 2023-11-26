@@ -23,7 +23,7 @@ struct Score{
 };
 
 struct Player{
-	bool isPlayerA; // true for Player A, false for Player B
+	bool who; // true for Player A, false for Player B
 	bool toMove; // Check if the Player to Move
 	bool isMoving; // Check if the Player is Moving
 	char name[256]; // Name of the Player
@@ -38,6 +38,7 @@ struct Sungka {
 	bool isStartState; // Check if it is still start state
 	bool flow; // true: clockwise, false counter clockwise;
 	int turns; // number of turns in the game
+	int winner; // 1: Player A, 0: Player B, -1: Draw
 	Player A;
 	Player B;
 };
@@ -67,7 +68,7 @@ void displayGuide();
 void displayBoard(const Sungka*);
 
 //Display the Updated Board relative to who's Turn it is
-void updateScreen(Sungka*, int);
+void updateScreen(Sungka*, const bool, int);
 
 //Display the Board during Start State
 void startStateUpdate(Sungka*, int);
@@ -153,6 +154,9 @@ void startState(Sungka*, const bool, const int);
 
 //Simulate Normal State
 void normalState(Sungka*, const bool, const int);
+
+//sets who won
+void setWinner(Sungka*);
 
 //Check Who is Winner
 void whoWinner(Sungka*, const bool);

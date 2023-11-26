@@ -4,6 +4,7 @@
 void initSungka(Sungka *board) {
     board->currentPlayer = true;
 	board->isStartState = true;
+	board->winner = -1;
 	board->flow = true;
 	board->turns = 0;
     for (int i = 0; i < 16; i++) {
@@ -21,7 +22,7 @@ void initPlayer(Sungka* board, bool player){
 	name[strlen(name) - 1] = '\0';
 	if(player){
 		printf("Hi %s, You are Player A\n", name);
-		board->A.isPlayerA = true;
+		board->A.who = true;
 		board->A.toMove = true;
 		board->A.shells = 0;
 		board->A.currentIndex = -1;
@@ -29,7 +30,7 @@ void initPlayer(Sungka* board, bool player){
 		return;
 	}
 	printf("Hi %s, You are Player B\n", name);
-	board->B.isPlayerA = false;
+	board->B.who = false;
 	board->B.toMove = false;
 	board->B.shells = 0;
 	board->B.currentIndex = -1;
@@ -94,29 +95,25 @@ void displayBoard(const Sungka *board){
 	displayPits(board, true);
 }
 
-void updateScreen(Sungka* board, int updateSpeed){
+void updateScreen(Sungka* board, const bool caller, int updateSpeed){
+	usleep(updateSpeed);
 	Player* current;
 	Player* A = getPlayer(board, true);
 	Player* B = getPlayer(board, false);
 	clearScreen();
-	if(board->isStartState){
-		printf("A: %s's Shells: %d\n", A->name, A->shells);
-		printf("B: %s's Shells: %d\n", B->name, B->shells);
-		displayBoard(board);
-	}
-	else{
-		current = getPlayer(board, board->currentPlayer);
-		printf("%s's Turn\n", current->name);
-		if(board->currentPlayer){
-			printf("Shells: %d\n", A->shells);
+	if(!board->isStartState){
+		if(caller == board->currentPlayer){
+			printf("Your Turn\n");
 		}
 		else{
-			printf("Shells: %d\n", B->shells);
+			current = getPlayer(board, board->currentPlayer);
+			printf("%s's Turn\n", current->name);
 		}
-		displayBoard(board);
 	}
+	printf("A: %s's Shells: %d\n", A->name, A->shells);
+	printf("B: %s's Shells: %d\n", B->name, B->shells);
+	displayBoard(board);
 	printf("\n");
-	usleep(updateSpeed);
 }
 
 void clearScreen(){
@@ -263,7 +260,7 @@ void setUserMove(Sungka* board){
 	char buffer[100];
 	int index;
 	Player* thisPlayer = getPlayer(board, board->currentPlayer);
-	printf("%c: Make Move[0-6]: ", (thisPlayer->isPlayerA)? 'A' : 'B');
+	printf("%c: Make Move[0-6]: ", (thisPlayer->who)? 'A' : 'B');
 	fgets(buffer, sizeof(buffer), stdin);
 
 	//Validate User Input
@@ -383,18 +380,49 @@ void simulateStep(Sungka* board){
 	}
 }
 
+void startState(Sungka* board, const bool player, const int client_socket){
+	Player* thisPlayer = getPlayer(board, player);
+	if(board->currentPlayer == player){
+		if(isHasShells(board, player)){
+			simulateStep(board);
+			switchPlayer(board);
+			send_t(client_socket, board);
+		}
+		else{
+			if(thisPlayer->toMove){
+				setUserMove(board);
+				toggleToMovePlayer(board, player, off);
+				simulateStep(board);
+				switchPlayer(board);
+				board->turns++;
+				send_t(client_socket, board);
+			}
+			else{
+				board->isStartState = false;
+				switchPlayer(board);
+				send_t(client_socket, board);
+			}
+		}
+    }
+	else{
+      recv_t(client_socket, board);
+    }
+}
+
 void normalState(Sungka* board, const bool player, const int client_socket){
 	Player* thisPlayer = getPlayer(board, player);
 	if(board->currentPlayer == player){
       if(!isHasMoves(board, player) && !isHasShells(board, player)){
         switchPlayer(board);
         toggleToMovePlayer(board, player, off);
+		board->turns++;
 		send_t(client_socket, board);
 		return;
       }
       if(thisPlayer->toMove){
         setUserMove(board);
         toggleToMovePlayer(board, player, off);
+		board->turns++;
 		send_t(client_socket, board);
 		return;
       }
@@ -405,10 +433,52 @@ void normalState(Sungka* board, const bool player, const int client_socket){
 	  if(thisPlayer->shells == 0 && !thisPlayer->toMove){
 		switchPlayer(board);
 		toggleToMovePlayer(board, player, off);
+		board->turns++;
 		send_t(client_socket, board);
 		return;
 	  }
     }else{
       recv_t(client_socket, board);
     }
+}
+
+void setWinner(Sungka* board){
+	Player* A = getPlayer(board, true);
+	Player* B = getPlayer(board, false);
+	if(board->pits[15] > board->pits[7]){
+		A->score.win += 1;
+		B->score.lost += 1;
+		board->winner = 1;
+	}
+	else if(board->pits[15] < board->pits[7]){
+		B->score.win += 1;
+		A->score.lost += 1;
+		board->winner = 0;
+	}
+	else{
+		A->score.draw += 1;
+		B->score.draw += 1;
+		board->winner = -1;
+	}
+}
+
+void whoWinner(Sungka* board, const bool player){
+	if(board->winner == -1){
+		printf("Draw\n");
+		
+	}
+	else if(board->winner == 1){
+		if(player)
+			printf("You Won\n");
+		else
+			printf("You Lost\n");
+	}
+	else{
+		if(!player)
+			printf("You Won\n");
+		else
+			printf("You Lost\n");
+	}
+	printf("Your Score: %d\n", getScore(board, player));
+	printf("%s Score: %d\n", getPlayer(board, !player)->name  ,getScore(board, !player));
 }

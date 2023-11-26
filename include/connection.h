@@ -8,7 +8,7 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <unistd.h>
-#define PORT_ADDR 9802
+#define PORT_ADDR 9803
 void init_server_connection(struct sockaddr_in*, int*, int*);
 void init_client_connection(struct sockaddr_in*, int*);
 void exit_with_error(char*);
