@@ -96,7 +96,6 @@ void displayBoard(const Sungka *board){
 }
 
 void updateScreen(Sungka* board, const bool caller, int updateSpeed){
-	usleep(updateSpeed);
 	Player* current;
 	Player* A = getPlayer(board, true);
 	Player* B = getPlayer(board, false);
@@ -114,6 +113,7 @@ void updateScreen(Sungka* board, const bool caller, int updateSpeed){
 	printf("B: %s's Shells: %d\n", B->name, B->shells);
 	displayBoard(board);
 	printf("\n");
+	usleep(updateSpeed);
 }
 
 void clearScreen(){
