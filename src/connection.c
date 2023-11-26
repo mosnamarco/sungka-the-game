@@ -1,6 +1,8 @@
 #include "../include/connection.h"
+#include "../include/sungka.h"
 
 void init_server_connection(struct sockaddr_in* server_address, int* server_socket, int* client_socket){
+  printf("Waiting for Your Opponent...\n");
   *server_socket = socket(AF_INET, SOCK_STREAM, 0);
   init_server(server_address);
   bind(*server_socket, (struct sockaddr*) server_address, sizeof(*server_address));
@@ -8,6 +10,7 @@ void init_server_connection(struct sockaddr_in* server_address, int* server_sock
 }
 
 void init_client_connection(struct sockaddr_in* server_address, int* client_socket){
+  printf("Waiting for Your Opponent...\n");
   *client_socket = socket(AF_INET, SOCK_STREAM, 0);
   init_server(server_address);
   connect_client_to_server(client_socket, server_address);

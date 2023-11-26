@@ -7,10 +7,10 @@ all: $(BUILD_DIR) server client #sungka
 $(BUILD_DIR):
 	mkdir -p $@
 
-server: src/server.c src/connection.c ./src/sungka.c
+server: ./src/sungka.c src/server.c src/connection.c 
 	$(CC) $(CFLAGS) $^ -o $(BUILD_DIR)/server
 
-client: src/client.c src/connection.c ./src/sungka.c
+client: ./src/sungka.c src/client.c src/connection.c 
 	$(CC) $(CFLAGS) $^ -o $(BUILD_DIR)/client
 	
 clean: 

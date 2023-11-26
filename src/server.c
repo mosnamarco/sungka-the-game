@@ -10,9 +10,8 @@ int main(int argc, char *argv[])
   int server_socket;
   int client_socket;
   init_server_connection(&server_address, &server_socket, &client_socket);
-  //Define Message Buffers
-  char client_message[256];
-  char server_message[256];
+  //Initialize Board and Name
+  bool player = true;
   Sungka board;
   initSungka(&board);
   initPlayer(&board, true); // Server is the Player A
@@ -23,26 +22,8 @@ int main(int argc, char *argv[])
   printf("You are Against %s\n", board.B.name);
   
   while(!isEndCondition(&board)){
-    if(board.currentPlayer) {
-      if(!isHasMoves(&board, board.currentPlayer)){
-        switchPlayer(&board);
-        toggleToMove(&board);
-      }
-      if(board.A.toMove){
-        setUserMove(&board);
-        toggleToMove(&board);
-      }
-      if(board.A.shells == 0){
-        switchPlayer(&board);
-        toggleToMove(&board);
-      }
-      simulateStep(&board);
-      send_t(client_socket, &board);
-      updateScreen(&board, 500000);
-    }else{
-      recv_t(client_socket, &board);
-      updateScreen(&board, 500000);
-    }
+    normalState(&board, player, client_socket);
+    updateScreen(&board, 500000);
   }
   // close the sockets
   close(server_socket);

@@ -7,24 +7,29 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 // Typedefs
+typedef struct Score Score;
 typedef struct Sungka Sungka;
-typedef enum Winner Winner;
 typedef struct Player Player;
 
-enum Winner{
-	A,
-	DRAW,
-	B
+//Define type alias
+#define on true
+#define off false
+
+struct Score{
+	unsigned int win;
+	unsigned int draw;
+	unsigned int lost;
 };
 
 struct Player{
 	bool isPlayerA; // true for Player A, false for Player B
 	bool toMove; // Check if the Player to Move
+	bool isMoving; // Check if the Player is Moving
 	char name[256]; // Name of the Player
 	int shells; //number of shells on hand
 	int currentIndex;
+	Score score; //Score of Player i.e # of (win, draw, lost)
 };
 
 struct Sungka {
@@ -43,14 +48,17 @@ void initSungka(Sungka*);
 //Initialize a Player
 void initPlayer(Sungka*, bool);
 
+//Initialize Score
+void initScore(Player*);
+
 //Flush input buffer
 void flushInputBuffer();
 
 //Format Print a Representation of a pit
-void displayPit(const int);
+void displayPit(const Sungka*, const int);
 
 //Display the pits on a side of the board
-void displayPits(const int*, const bool);
+void displayPits(const Sungka*, const bool);
 
 // Display Which Pits are Playable
 void displayGuide();
@@ -95,13 +103,21 @@ bool isEmptyPit(const Sungka*, const int);
 //Check if a Player has possible moves
 bool isHasMoves(const Sungka*,  const bool);
 
+//Check if a Player has shells on hand
+bool isHasShells(Sungka*, const bool);
+
 //Check if the End Condition is Met
-bool isEndCondition(const Sungka*);
+bool isEndCondition(Sungka*);
 
-Winner whoWinner(const Sungka*);
+//Return the Pointer to Player Object
+Player* getPlayer(Sungka*, const bool);
 
-//Return the Player's Name
-char getPlayer(const bool);
+/* 
+	Get Score of Player
+	param 1: Player Object
+	param 2: Which Score to Get, 1: win, 2: draw, 3: lost
+*/
+unsigned int getPlayerScore(Player, int type);
 
 //Get the Index Across a pit
 int getPitIndexAcross(const int);
@@ -114,8 +130,11 @@ void getShellsFromPit(Sungka*, int*, const int i);
 //Get the User Move
 void setUserMove(Sungka*);
 
-//Toggle Player to Move
+//Toggle Current Player to Move
 void toggleToMove(Sungka*);
+
+//Toggle Specifici Player to Move
+void toggleToMovePlayer(Sungka*, bool, bool);
 
 //Logic if the last shell of the Player is at their Home
 void lastShellAtHome(Sungka*, int*);
@@ -130,6 +149,12 @@ void notLastShellLogic(Sungka*, int*, int);
 void simulateStep(Sungka*);
 
 //Simulate Start State of the Game
-bool startState(Sungka*);
+void startState(Sungka*, const bool, const int);
+
+//Simulate Normal State
+void normalState(Sungka*, const bool, const int);
+
+//Check Who is Winner
+void whoWinner(Sungka*, const bool);
 
 #endif
