@@ -5,48 +5,27 @@
 
 int main(int argc, char *argv[])
 {
-  // Define Server Connection Requirements and Make Server Listen to Incoming Client
+  // Initialize Game and Stablish the Connection
   struct sockaddr_in server_address;
-  int server_socket;
-  int client_socket;
-  init_server_connection(&server_address, &server_socket, &client_socket);
-  //Define Message Buffers
-  char client_message[256];
-  char server_message[256];
+  int server_socket, client_socket;
   Sungka board;
-  initSungka(&board);
-  initPlayer(&board, true); // Server is the Player A
-  send_t(client_socket, &board);
-  printf("Waiting for Your Opponent...\n");
-  recv_t(client_socket, &board);
-  clearScreen();
-  printf("You are Against %s\n", board.B.name);
-  
+  bool player = true;
+  init_server_connection(&server_address, &server_socket, &client_socket, argc, argv[0], atoi(argv[1]));
+  initGame(&board, client_socket, player);
+  //Game Loop
   while(!isEndCondition(&board)){
-    if(board.currentPlayer) {
-      if(!isHasMoves(&board, board.currentPlayer)){
-        switchPlayer(&board);
-        toggleToMove(&board);
-      }
-      if(board.A.toMove){
-        setUserMove(&board);
-        toggleToMove(&board);
-      }
-      if(board.A.shells == 0){
-        switchPlayer(&board);
-        toggleToMove(&board);
-      }
-      simulateStep(&board);
-      send_t(client_socket, &board);
-      updateScreen(&board, 500000);
-    }else{
-      recv_t(client_socket, &board);
-      updateScreen(&board, 500000);
-    }
+    if(board.isStartState)
+      startState(&board, player, client_socket);
+    else
+      normalState(&board, player, client_socket);
+    updateScreen(&board, player, 350000);
   }
+  //Determine Winner
+  setWinner(&board);
+  whoWinner(&board, player);
+  send_t(client_socket, &board);
   // close the sockets
   close(server_socket);
   close(client_socket);
-
   return 0;
 }
