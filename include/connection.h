@@ -8,11 +8,10 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <unistd.h>
-#define PORT_ADDR 9803
-void init_server_connection(struct sockaddr_in*, int*, int*);
-void init_client_connection(struct sockaddr_in*, int*);
+void init_server_connection(struct sockaddr_in*, int*, int*, const int, const char*, const int);
+void init_client_connection(struct sockaddr_in*, int*, const int, const char *, const char*, const int);
 void exit_with_error(char*);
-void init_server(struct sockaddr_in*);
+void init_server(struct sockaddr_in*, const int);
 void connect_client_to_server(int*, struct sockaddr_in*);
 int listen_and_accept_connections(int);
 void send_t(int, Sungka*);

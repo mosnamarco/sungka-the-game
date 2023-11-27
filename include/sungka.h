@@ -47,7 +47,10 @@ struct Sungka {
 void initSungka(Sungka*);
 
 //Initialize a Player
-void initPlayer(Sungka*, bool);
+void initPlayer(Sungka*, char*, bool);
+
+//Initialize the Game
+void initGame(Sungka*, const int, const bool);
 
 //Initialize Score
 void initScore(Player*);
@@ -56,16 +59,16 @@ void initScore(Player*);
 void flushInputBuffer();
 
 //Format Print a Representation of a pit
-void displayPit(const Sungka*, const int);
+void displayPit(Sungka*, const int);
 
 //Display the pits on a side of the board
-void displayPits(const Sungka*, const bool);
+void displayPits(Sungka*, const bool);
 
 // Display Which Pits are Playable
 void displayGuide();
 
 //Display the Whole Board
-void displayBoard(const Sungka*);
+void displayBoard(Sungka*);
 
 //Display the Updated Board relative to who's Turn it is
 void updateScreen(Sungka*, const bool, int);

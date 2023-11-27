@@ -8,18 +8,14 @@ void initSungka(Sungka *board) {
 	board->flow = true;
 	board->turns = 0;
     for (int i = 0; i < 16; i++) {
-		board->pits[i] = 1;  // Start with 7 shells in each pit
+		board->pits[i] = 7;  // Start with 7 shells in each pit
     }
 	//Set all scores to 0
 	board->pits[7] = 0;
 	board->pits[15] = 0;
 }
 
-void initPlayer(Sungka* board, bool player){
-	char name[256];
-	printf("Enter Your Name: ");
-	fgets(name, sizeof(name), stdin);
-	name[strlen(name) - 1] = '\0';
+void initPlayer(Sungka* board, char* name, bool player){
 	if(player){
 		printf("Hi %s, You are Player A\n", name);
 		board->A.who = true;
@@ -37,27 +33,71 @@ void initPlayer(Sungka* board, bool player){
 	strcpy(board->B.name, name);
 }
 
+void initGame(Sungka* board, const int client_socket, const bool player){
+	char name[256];
+	printf("Enter Your Name: ");
+	fgets(name, sizeof(name), stdin);
+	name[strlen(name) - 1] = '\0';
+	if(player){
+		initSungka(board);
+		initPlayer(board, name,player); // Server is the Player A
+		send_t(client_socket, board);
+		printf("Waiting for Your Opponent...\n");
+		recv_t(client_socket, board);
+		clearScreen();
+		printf("You are Against %s\n", board->B.name);
+		//Set The Initial Move for Starting State
+		setUserMove(board);
+		switchPlayer(board);
+		toggleToMove(board);
+		printf("Waiting for %s to Move", board->B.name);
+		send_t(client_socket, board);
+		recv_t(client_socket, board);
+	}
+	else{
+		recv_t(client_socket, board);
+		initPlayer(board, name, player);
+		send_t(client_socket, board);
+		clearScreen();
+		printf("You are Against %s\n", board->A.name);
+		printf("Waiting for %s to Move\n", board->A.name);
+		// Set The Initial Move for Starting State
+		recv_t(client_socket, board);
+		setUserMove(board);
+		switchPlayer(board);
+		send_t(client_socket, board);
+	}
+}
+
 void flushInputBuffer() {
     int c;
     while ((c = getchar()) != '\n' && c != EOF) {
     }
 }
 
-void displayPit(const Sungka* board, const int i){
+void displayPit(Sungka* board, const int i){
 	int aIndex = board->A.currentIndex, bIndex = board->B.currentIndex;
 	int val = board->pits[i];
 	char c = ' ';
-	if(aIndex == i)
-		c = 'A';
-	else if (bIndex == i)
-		c = 'B';
+	if(board->isStartState){
+		if(aIndex == i)
+			c = 'A';
+		else if (bIndex == i)
+			c = 'B';
+	}
+	else{
+		Player* thisPlayer = getPlayer(board, board->currentPlayer);
+		if(thisPlayer->currentIndex == i){
+			c = (thisPlayer->who) ? 'A' : 'B';
+		}
+	}
 	if (val < 10)
-		printf("[%c: %d]", c, val);
+		printf("[%c %d]", c, val);
 	else
-		printf("[%c:%d]", c, val);
+		printf("[%c%d]", c, val);
 }
 
-void displayPits(const Sungka* board, const bool player){
+void displayPits(Sungka* board, const bool player){
 	if(!player){
 		for (int i = 0; i <= 6; i++) {
 			printf("\t");
@@ -80,7 +120,7 @@ void displayGuide(){
 	printf("\n");
 }
 
-void displayBoard(const Sungka *board){
+void displayBoard(Sungka *board){
 	//Display Player B's Pits
 	displayPits(board, false);
 	
@@ -324,7 +364,7 @@ void lastShellLogic(Sungka* board, int* shells, int i){
 		else{
 			int across = getPitIndexAcross(i);
 			//if it is in the player pits and empty and across is not empty, add all pits to score
-			if(isPlayerPits(board, i) && !isEmptyPit(board, across)){
+			if(isPlayerPits(board->currentPlayer, i) && !isEmptyPit(board, across)){
 				int incScore = *shells + board->pits[across];
 				addScore(board, incScore);
 				*shells = 0;
@@ -415,6 +455,7 @@ void normalState(Sungka* board, const bool player, const int client_socket){
       if(!isHasMoves(board, player) && !isHasShells(board, player)){
         switchPlayer(board);
         toggleToMovePlayer(board, player, off);
+		thisPlayer->currentIndex = -2;
 		board->turns++;
 		send_t(client_socket, board);
 		return;
@@ -433,6 +474,7 @@ void normalState(Sungka* board, const bool player, const int client_socket){
 	  if(thisPlayer->shells == 0 && !thisPlayer->toMove){
 		switchPlayer(board);
 		toggleToMovePlayer(board, player, off);
+		thisPlayer->currentIndex = -2;
 		board->turns++;
 		send_t(client_socket, board);
 		return;
