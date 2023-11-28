@@ -8,6 +8,8 @@
 
 Sungka: The Game is based on a real life Filipino game called "Sungka". According to wikipedia; Southeast Asian mancalas are a subtype of mancala games predominantly found in Southeast Asia. They are known as congklak (VOS Spelling: tjongklak), congkak, congka, and dakon in Indonesia, congkak in Malaysia and Brunei, and sungkâ in the Philippines. They differ from other mancala games in that the player's store is included in the placing of the seeds. Like other mancalas, they vary widely in terms of the rules and number of holes used.
 
+***[This piece of software is for our OS subject. Members include: Marco (mosnamarco), Kd (asurazur), Matt (maldkun), Justin Ira (Jian), and last but not least, Gab (Shiroatama)]***
+
 ## Game Rules
 
 The rules for the most common seven-hole mancala versions in Brunei, Indonesia, Malaysia, the Maldives, Marianas, and the Philippines are almost identical. Each player controls the seven holes on the side of the board to their left, and their score is the number of seeds in their store holes. Seven seeds are placed in each small hole except for the players' store hole. The objective of the game is to capture more seeds in the store than one's opponent.
