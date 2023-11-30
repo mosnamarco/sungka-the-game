@@ -43,8 +43,8 @@ source: [Wikipedia](https://en.wikipedia.org/wiki/Southeast_Asian_mancala)
 1. `git clone <repository link>`
 2. `cd <cloned repository directory>`
 3. `make`
-4. run server `./dist/server`
-5. run client `./dist/client`
+4. run server `./dist/server <port number>` e.g. `./dist/server 9999`
+5. run client `./dist/client <server address> <port number>` e.g. `./dist/client 192.168.1.1 9999`
 
 ## For contributing developers
 
